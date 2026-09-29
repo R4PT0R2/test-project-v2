@@ -118,7 +118,7 @@ padding:20px;
 h1{
 font-size:60px;
 margin-bottom:20px;
-transition: opacity 0.8s ease;
+transition: opacity 0.6s ease;
 text-shadow: 0 0 15px rgba(255,255,255,0.3);
 }
 
@@ -126,7 +126,7 @@ p{
 font-size:22px;
 margin-bottom:30px;
 max-width:700px;
-transition: opacity 0.8s ease;
+transition: opacity 0.6s ease;
 }
 
 h1.huge-text {
@@ -147,6 +147,7 @@ transition: opacity 0.6s ease;
 opacity: 0;
 }
 
+/* СТИЛЬ НЕОНОВЫХ КНОПОК */
 .neon-btn {
 padding: 18px 45px;
 font-size: 20px;
@@ -170,7 +171,22 @@ box-shadow: 0 0 30px #00e5ff, 0 0 60px #00e5ff;
 transform: scale(1.05);
 }
 
-/* СТИЛИ ДЛЯ КИНЕМАТОГРАФИЧНЫХ СКРИНШОТОВ ЧАТА */
+/* Кнопка ДАЛЕЕ для мини-игры */
+.next-btn {
+position: fixed;
+bottom: 5vh;
+z-index: 20;
+border-color: #ff00ff;
+box-shadow: 0 0 10px rgba(255, 0, 255, 0.4), inset 0 0 10px rgba(255, 0, 255, 0.4);
+display: none; /* Появится во время игры */
+opacity: 0;
+}
+
+.next-btn:hover {
+background: #ff00ff;
+box-shadow: 0 0 30px #ff00ff, 0 0 60px #ff00ff;
+}
+
 .screenshot-container {
 position: fixed;
 inset: 0;
@@ -179,7 +195,7 @@ height: 100%;
 display: flex;
 justify-content: center;
 align-items: center;
-z-index: 8; /* Поверх фона, но под кнопками финала */
+z-index: 8;
 pointer-events: none;
 }
 
@@ -192,13 +208,12 @@ box-shadow: 0 20px 50px rgba(0, 229, 255, 0.25);
 border: 1px solid rgba(255, 255, 255, 0.2);
 opacity: 0;
 transform: scale(0.9) rotate(-1deg);
-transition: opacity 1.2s ease, transform 6s linear; /* Эффект медленного «наплыва» на зрителя */
+transition: opacity 0.8s ease, transform 10s linear;
 }
 
-/* Эффект движения скриншота вперед */
 .chat-screenshot.zoom-active {
 opacity: 1;
-transform: scale(1.05) rotate(1deg);
+transform: scale(1.06) rotate(1deg);
 }
 
 .final-actions {
@@ -225,7 +240,6 @@ transition: opacity 1s ease;
 
 <canvas id="lightningCanvas"></canvas>
 
-<!-- Контейнер, где будут оживать ваши скриншоты переписок -->
 <div class="screenshot-container">
     <img id="screenshotDisplay" class="chat-screenshot" src="" alt="Момент чата">
 </div>
@@ -243,13 +257,15 @@ transition: opacity 1s ease;
         <button class="btn-delete" onclick="actionDelete()">Удалить ✖</button>
         <button class="btn-save" onclick="actionSave()">Сохранить ❤️</button>
     </div>
-
-    <!-- Обновленные теги для новых песен -->
-    <audio id="voice" src="new-intro.mp3"></audio>
-    <audio id="kamin" src="kamin.mp3" loop></audio>
-    <audio id="finalVoice" src="final.mp3"></audio>
-    <audio id="sagaMusic" src="new-final.mp3" loop></audio>
 </div>
+
+<!-- Интерактивная кнопка управления сюжетом -->
+<button id="nextBtn" class="neon-btn next-btn" onclick="nextStep()">ДАЛЕЕ ➔</button>
+
+<audio id="voice" src="new-intro.mp3"></audio>
+<audio id="kamin" src="kamin.mp3" loop></audio>
+<audio id="finalVoice" src="final.mp3"></audio>
+<audio id="sagaMusic" src="new-final.mp3" loop></audio>
 
 <script src="script.js"></script>
 
