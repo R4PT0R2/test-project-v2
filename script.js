@@ -1,11 +1,13 @@
+let stopLightning = false;
+
 function triggerLightningEffect() {
     const canvas = document.getElementById("lightningCanvas");
-    if (!canvas) return;
+    if (!canvas || stopLightning) return;
     const ctx = canvas.getContext("2d");
     
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    let flashes = 3;
+    let flashes = Math.floor(Math.random() * 3) + 2;
 
     function drawLightningChain(x1, y1, x2, y2, displace) {
         if (displace < 1.8) {
@@ -24,12 +26,17 @@ function triggerLightningEffect() {
     }
 
     function launchFlash() {
-        if (flashes <= 0) {
+        if (stopLightning) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             return;
         }
+        if (flashes <= 0) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            setTimeout(triggerLightningEffect, Math.random() * 1200 + 300);
+            return;
+        }
         flashes--;
-        ctx.fillStyle = `rgba(180, 245, 255, ${Math.random() * 0.25 + 0.15})`;
+        ctx.fillStyle = `rgba(180, 245, 255, ${Math.random() * 0.2 + 0.15})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = "rgba(225, 250, 255, 1)";
         ctx.lineWidth = Math.random() * 3 + 2;
@@ -43,7 +50,7 @@ function triggerLightningEffect() {
         }
         setTimeout(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            setTimeout(launchFlash, Math.random() * 120 + 60);
+            setTimeout(launchFlash, Math.random() * 100 + 50);
         }, 70);
     }
     launchFlash();
@@ -99,23 +106,22 @@ function changeText(title, text) {
 
 function playVoice() {
     document.getElementById("startBtn").style.display = "none";
+    stopLightning = false;
     triggerLightningEffect();
 
     const voice = document.getElementById("voice");
     const music = document.getElementById("kamin");
     const finalVoice = document.getElementById("finalVoice");
     const saga = document.getElementById("sagaMusic");
-    const video = document.getElementById("chatVideo");
 
     try { finalVoice.volume = 0; finalVoice.play().then(() => finalVoice.pause()); } catch(e){}
     try { saga.volume = 0; saga.play().then(() => saga.pause()); } catch(e){}
-    try { video.volume = 1; video.play().then(() => video.pause()); } catch(e){}
 
     createEffects();
     
     if (voice) {
         voice.play().catch(function(err) {
-            console.log("start.mp3 не найден:", err);
+            console.log("new-intro.mp3 не найден, переход:", err);
             setTimeout(() => { startKaminSequence(); }, 1000);
         });
         voice.onended = function() { startKaminSequence(); };
@@ -126,8 +132,6 @@ function playVoice() {
 
 function startKaminSequence() {
     const music = document.getElementById("kamin");
-    const video = document.getElementById("chatVideo");
-    
     if (music) {
         music.volume = 0.15;
         music.play().catch(e => console.log(e));
@@ -139,25 +143,62 @@ function startKaminSequence() {
     setTimeout(function() { changeText("Но", "Иногда нескольких месяцев достаточно, чтобы человек стал особенным."); }, 10000);
     setTimeout(function() { changeText("Спасибо", "За разговоры. За улыбки. За моменты, которые были только нашими."); }, 15000);
 
+    // Ровно через 20 секунд убираем текст, глушим грозу и запускаем показ скриншотов воспоминаний
     setTimeout(function() {
         const h1 = document.getElementById("mainTitle");
         const p = document.getElementById("mainText");
         if (h1) h1.style.opacity = "0";
         if (p) p.style.opacity = "0";
-    }, 19000);
-
-    setTimeout(function() {
-        if (video) {
-            video.style.display = "block";
-            if (music) music.volume = 0.25; 
-            video.play().catch(function(error) {
-                console.log("chat.mp4 не найден:", error);
-                startFinalSequence(); 
-            });
-        } else {
-            startFinalSequence();
-        }
+        stopLightning = true;
+        
+        if (music) music.volume = 0.25; // Делаем камин погромче во время показа галереи
+        startScreenshowAlbum();
     }, 20000);
+}
+
+// ГЕНЕРАТОР ГАЛЕРЕИ ВОСПОМИНАНИЙ (Слайд-шоу вместо видео)
+function showSingleScreenshot(imgName, duration) {
+    const imgElement = document.getElementById("screenshotDisplay");
+    if (!imgElement) return;
+
+    // Сбрасываем старый масштаб, ставим новую картинку
+    imgElement.classList.remove("zoom-active");
+    imgElement.src = imgName;
+
+    // Запускаем плавное проявление и наплыв вперед
+    setTimeout(() => {
+        imgElement.classList.add("zoom-active");
+    }, 100);
+
+    // За секунду до конца плавно растворяем картинку обратно в темноту
+    setTimeout(() => {
+        imgElement.classList.remove("zoom-active");
+    }, duration - 1200);
+}
+
+function startScreenshowAlbum() {
+    // Делаем общий оверлей темнее (до 85%), чтобы скриншоты чата светились неоном в темноте
+    const overlay = document.getElementById("bgOverlay");
+    if (overlay) overlay.style.background = "rgba(0,0,0,0.85)";
+
+    // Расписание показа скриншотов (каждый показывается по 5 секунд)
+    // 0 сек от старта альбома — Скриншот 1
+    showSingleScreenshot("screen1.png", 5000);
+
+    // 5 сек от старта альбома — Скриншот 2
+    setTimeout(() => {
+        showSingleScreenshot("screen2.png", 5000);
+    }, 5000);
+
+    // 10 сек от старта альбома — Скриншот 3
+    setTimeout(() => {
+        showSingleScreenshot("screen3.png", 5000);
+    }, 10000);
+
+    // 15 сек от старта альбома — Закрываем альбом и переходим к вашей финальной цепочке экранов
+    setTimeout(() => {
+        startFinalSequence();
+    }, 15000);
 }
 
 function startFinalSequence() {
@@ -187,84 +228,84 @@ function startFinalSequence() {
     if (p) { p.style.transition = "none"; p.style.opacity = "1"; p.innerText = "Спасибо за эти моменты."; }
     if (pSub) pSub.style.transition = "none";
 
-    setTimeout(function() {
-        if (p) p.innerText = "Ирина...";
-
-        setTimeout(function() {
-            if (h1) {
-                h1.className = "huge-text";
-                h1.innerText = "Я ЛЮБЛЮ ТЕБЯ";
-            }
-            if (p) p.innerText = "";
-
-            setTimeout(function() {
-                if (h1) { h1.innerText = ""; h1.className = ""; }
-                if (finalVoice) {
-                    finalVoice.volume = 1;
-                    finalVoice.play().catch(() => runFinalScreenFive());
-                    finalVoice.onended = function() { runFinalScreenFive(); };
-                } else {
-                    runFinalScreenFive();
-                }
-            }, 6000);
-        }, 2000);
-    }, 3000);
+    // ЛИНЕЙНЫЙ ТАЙМЛАЙН ФИНАЛА (Без матрёшек из скобок!)
+    setTimeout(() => { if (p) p.innerText = "Ирина..."; }, 3000);
+    
+    setTimeout(() => { 
+        if (h1) h1.className = "huge-text"; 
+        if (h1) h1.innerText = "Я ЛЮБЛЮ ТЕБЯ"; 
+        if (p) p.innerText = ""; 
+    }, 5000);
+    
+    setTimeout(() => {
+        if (h1) h1.innerText = "";
+        if (h1) h1.className = "";
+        if (finalVoice) {
+            finalVoice.volume = 1;
+            finalVoice.play().catch(() => runFinalScreenFive());
+            finalVoice.onended = function() { runFinalScreenFive(); };
+        } else {
+            runFinalScreenFive();
+        }
+    }, 11000);
 }
 
 function runFinalScreenFive() {
     const h1 = document.getElementById("mainTitle");
     const pSub = document.getElementById("finalSubText");
     const saga = document.getElementById("sagaMusic");
+    const finalBtns = document.getElementById("finalButtons");
 
     if (saga) {
         saga.volume = 0.3;
         saga.play().catch(e => console.log("Ошибка саги:", e));
     }
-    if (h1) { h1.style.opacity = "1"; h1.innerText = "Ирина ❤️ Эльмар"; }
+    if (h1) { h1.style.opacity = "1"; h1.innerText = "Ирина ❤️ Эльнар"; }
     if (pSub) { pSub.innerText = "Спасибо за эти полгода."; pSub.style.opacity = "1"; }
 
-    setTimeout(function() {
+    // ТАЙМЕРЫ УХОДА ТЕКСТА И ПОКАЗА КНОПОК ОТ НАЧАЛА ЭКРАНА 5
+    // ТАЙМЕРЫ УХОДА ТЕКСТА И ПОКАЗА КНОПОК ОТ НАЧАЛА ЭКРАНА 5
+    setTimeout(() => {
         if (h1) h1.style.transition = "opacity 2.5s ease";
         if (pSub) pSub.style.transition = "opacity 2.5s ease";
         if (h1) h1.classList.add("fade-out");
         if (pSub) pSub.classList.add("fade-out");
-
-        setTimeout(function() {
-            if (pSub) pSub.innerText = ""; 
-            if (h1) {
-                h1.classList.remove("fade-out");
-                h1.style.transition = "opacity 1.5s ease";
-                h1.innerText = "Конец?";
-            }
-
-            setTimeout(function() {
-                if (h1) h1.classList.add("fade-out");
-                setTimeout(function() {
-                    if (h1) {
-                        h1.classList.remove("fade-out");
-                        h1.style.transition = "opacity 1.5s ease";
-                        h1.innerText = "Может быть, только начало.";
-                    }
-                    setTimeout(function() {
-                        const finalBtns = document.getElementById("finalButtons");
-                        if (finalBtns) {
-                            finalBtns.style.opacity = "1";
-                            finalBtns.style.pointerEvents = "auto"; 
-                        }
-                    }, 5000);
-                }, 2000);
-            }, 3500);
-        }, 2500);
     }, 7000);
+
+    setTimeout(() => {
+        if (pSub) pSub.innerText = "";
+        if (h1) {
+            h1.classList.remove("fade-out");
+            h1.style.transition = "opacity 1.5s ease";
+            h1.innerText = "Конец?";
+        }
+    }, 9500);
+
+    setTimeout(() => { 
+        if (h1) h1.classList.add("fade-out"); 
+    }, 13000);
+
+    setTimeout(() => {
+        if (h1) {
+            h1.classList.remove("fake-out");
+            h1.classList.remove("fade-out");
+            h1.style.transition = "opacity 1.5s ease";
+            h1.innerText = "Может быть, только начало.";
+        }
+    }, 15000);
+
+    setTimeout(() => {
+        if (finalBtns) {
+            finalBtns.style.opacity = "1";
+            finalBtns.style.pointerEvents = "auto";
+        }
+    }, 20000);
 }
 
-function actionDelete() { window.location.href = "delete.html"; }
-function actionSave() { window.location.href = "save.html"; }
+function actionDelete() { 
+    window.location.href = "delete.html"; 
+}
 
-const cv = document.getElementById("chatVideo");
-if (cv) {
-    cv.addEventListener("ended", function() {
-this.style.display = "none";
-  startFinalSequence();
-});
+function actionSave() { 
+    window.location.href = "save.html"; 
 }

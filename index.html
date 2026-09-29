@@ -25,6 +25,7 @@ inset:0;
 width:100%;
 height:100%;
 object-fit:cover;
+transition: opacity 2s ease;
 }
 
 .overlay{
@@ -32,9 +33,9 @@ position:fixed;
 inset:0;
 background:rgba(0,0,0,.55);
 z-index: 5;
+transition: background 2s ease;
 }
 
-/* Холст для рисования молний */
 #lightningCanvas {
 position: fixed;
 inset: 0;
@@ -117,7 +118,7 @@ padding:20px;
 h1{
 font-size:60px;
 margin-bottom:20px;
-transition: opacity 0.6s ease;
+transition: opacity 0.8s ease;
 text-shadow: 0 0 15px rgba(255,255,255,0.3);
 }
 
@@ -125,7 +126,7 @@ p{
 font-size:22px;
 margin-bottom:30px;
 max-width:700px;
-transition: opacity 0.6s ease;
+transition: opacity 0.8s ease;
 }
 
 h1.huge-text {
@@ -146,7 +147,6 @@ transition: opacity 0.6s ease;
 opacity: 0;
 }
 
-/* КРАСИВАЯ НЕОНОВАЯ КНОПКА СТАРТА */
 .neon-btn {
 padding: 18px 45px;
 font-size: 20px;
@@ -170,6 +170,37 @@ box-shadow: 0 0 30px #00e5ff, 0 0 60px #00e5ff;
 transform: scale(1.05);
 }
 
+/* СТИЛИ ДЛЯ КИНЕМАТОГРАФИЧНЫХ СКРИНШОТОВ ЧАТА */
+.screenshot-container {
+position: fixed;
+inset: 0;
+width: 100%;
+height: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 8; /* Поверх фона, но под кнопками финала */
+pointer-events: none;
+}
+
+.chat-screenshot {
+max-width: 85%;
+max-height: 75vh;
+object-fit: contain;
+border-radius: 20px;
+box-shadow: 0 20px 50px rgba(0, 229, 255, 0.25);
+border: 1px solid rgba(255, 255, 255, 0.2);
+opacity: 0;
+transform: scale(0.9) rotate(-1deg);
+transition: opacity 1.2s ease, transform 6s linear; /* Эффект медленного «наплыва» на зрителя */
+}
+
+/* Эффект движения скриншота вперед */
+.chat-screenshot.zoom-active {
+opacity: 1;
+transform: scale(1.05) rotate(1deg);
+}
+
 .final-actions {
 display: flex;
 gap: 20px;
@@ -179,25 +210,10 @@ pointer-events: none;
 transition: opacity 1s ease;
 }
 
-.btn-delete {
-background: #ff4d4d;
-color: white;
-}
-
-.btn-delete:hover {
-background: #e63939;
-box-shadow: 0 0 15px #ff4d4d;
-}
-
-.btn-save {
-background: #00cc66;
-color: white;
-}
-
-.btn-save:hover {
-background: #00b359;
-box-shadow: 0 0 15px #00cc66;
-}
+.btn-delete { background: #ff4d4d; color: white; }
+.btn-delete:hover { background: #e63939; box-shadow: 0 0 15px #ff4d4d; }
+.btn-save { background: #00cc66; color: white; }
+.btn-save:hover { background: #00b359; box-shadow: 0 0 15px #00cc66; }
 </style>
 </head>
 
@@ -207,15 +223,18 @@ box-shadow: 0 0 15px #00cc66;
 <div id="bgOverlay" class="overlay"></div>
 <div id="particles-container"></div>
 
-<!-- Канвас для анимации электрических молний -->
 <canvas id="lightningCanvas"></canvas>
+
+<!-- Контейнер, где будут оживать ваши скриншоты переписок -->
+<div class="screenshot-container">
+    <img id="screenshotDisplay" class="chat-screenshot" src="" alt="Момент чата">
+</div>
 
 <div class="content">
     <h1 id="mainTitle">Для Ирины</h1>
-    <p id="mainText">Небольшое воспоминание от Эльмара</p>
+    <p id="mainText">Небольшое воспоминание от Эльнара</p>
     <p id="finalSubText" class="sub-text"></p> 
 
-    <!-- Применена стильная кнопка .neon-btn -->
     <button id="startBtn" class="neon-btn" onclick="playVoice()">
     НАЧАТЬ
     </button>
@@ -225,27 +244,12 @@ box-shadow: 0 0 15px #00cc66;
         <button class="btn-save" onclick="actionSave()">Сохранить ❤️</button>
     </div>
 
-    <audio id="voice" src="start.mp3"></audio>
+    <!-- Обновленные теги для новых песен -->
+    <audio id="voice" src="new-intro.mp3"></audio>
     <audio id="kamin" src="kamin.mp3" loop></audio>
     <audio id="finalVoice" src="final.mp3"></audio>
-    <audio id="sagaMusic" src="saga.mp3" loop></audio>
+    <audio id="sagaMusic" src="new-final.mp3" loop></audio>
 </div>
-
-<!-- Видео переписки (Один целый файл с Dropbox) -->
-<video id="chatVideo" style="
-   display:none;
-   position:fixed;
-   top:0;
-   left:0;
-   width:100%;
-   height:100%;
-   object-fit:contain;
-   pointer-events:none;
-   mix-blend-mode: screen; 
-   z-index:15;">
-   <!-- ИСПРАВЛЕНО: Сюда вставьте вашу готовую ссылку с dl=1 на конце -->
-   <source src="https://www.dropbox.com/scl/fi/axkdw7lylmti6ewvz508x/chat.mp4?rlkey=obna7845why8pk5z8lvxsag0m&st=trcjdd5w&dl=1" type="video/mp4">
-</video>
 
 <script src="script.js"></script>
 
