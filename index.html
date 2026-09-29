@@ -45,6 +45,39 @@ z-index: 7;
 pointer-events: none;
 }
 
+/* СТИЛИ ИГРОВОГО ЭКРАНА */
+#gameCanvas {
+position: fixed;
+inset: 0;
+width: 100%;
+height: 100%;
+z-index: 9;
+display: none; /* Включится во время игры */
+cursor: pointer;
+}
+
+#gameTaskText {
+position: fixed;
+top: 5vh;
+width: 100%;
+text-align: center;
+color: #00e5ff;
+font-size: 24px;
+font-weight: bold;
+letter-spacing: 1px;
+text-shadow: 0 0 10px #00e5ff;
+z-index: 12;
+display: none;
+pointer-events: none;
+animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+0% { opacity: 0.7; }
+50% { opacity: 1; }
+100% { opacity: 0; }
+}
+
 #particles-container {
 position: fixed;
 inset: 0;
@@ -147,7 +180,6 @@ transition: opacity 0.6s ease;
 opacity: 0;
 }
 
-/* СТИЛЬ НЕОНОВЫХ КНОПОК */
 .neon-btn {
 padding: 18px 45px;
 font-size: 20px;
@@ -169,22 +201,6 @@ color: #000;
 background: #00e5ff;
 box-shadow: 0 0 30px #00e5ff, 0 0 60px #00e5ff;
 transform: scale(1.05);
-}
-
-/* Кнопка ДАЛЕЕ для мини-игры */
-.next-btn {
-position: fixed;
-bottom: 5vh;
-z-index: 20;
-border-color: #ff00ff;
-box-shadow: 0 0 10px rgba(255, 0, 255, 0.4), inset 0 0 10px rgba(255, 0, 255, 0.4);
-display: none; /* Появится во время игры */
-opacity: 0;
-}
-
-.next-btn:hover {
-background: #ff00ff;
-box-shadow: 0 0 30px #ff00ff, 0 0 60px #ff00ff;
 }
 
 .screenshot-container {
@@ -240,6 +256,10 @@ transition: opacity 1s ease;
 
 <canvas id="lightningCanvas"></canvas>
 
+<!-- Игровой интерфейс мини-игры -->
+<div id="gameTaskText">Помоги Эльнару открыть дверь в воспоминания ➔</div>
+<canvas id="gameCanvas"></canvas>
+
 <div class="screenshot-container">
     <img id="screenshotDisplay" class="chat-screenshot" src="" alt="Момент чата">
 </div>
@@ -259,13 +279,11 @@ transition: opacity 1s ease;
     </div>
 </div>
 
-<!-- Интерактивная кнопка управления сюжетом -->
-<button id="nextBtn" class="neon-btn next-btn" onclick="nextStep()">ДАЛЕЕ ➔</button>
-
 <audio id="voice" src="new-intro.mp3"></audio>
 <audio id="kamin" src="kamin.mp3" loop></audio>
 <audio id="finalVoice" src="final.mp3"></audio>
 <audio id="sagaMusic" src="new-final.mp3" loop></audio>
+<audio id="doorSound" src="door-open.mp3"></audio>
 
 <script src="script.js"></script>
 
