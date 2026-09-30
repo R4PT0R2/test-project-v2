@@ -90,7 +90,6 @@ function changeText(title, text) {
     }, 600);
 }
 
-// ИСПРАВЛЕНО: Убрана критическая опечатка, ломавшая запуск
 function showSingleScreenshot(imgName, duration) {
     const imgElement = document.getElementById("screenshotDisplay");
     if (!imgElement) return;
@@ -144,7 +143,7 @@ function startKaminSequence() {
     }, 20000);
 }
 
-// ДВИЖОК И ГРАФИКА МИНИ-ИГРЫ НА CANVAS (САМОРИСОВАНИЕ)
+// УЛУЧШЕННЫЙ ИГРОВОЙ ДВИЖОК С КРАСИВОЙ КИНЕМАТОГРАФИЧНОЙ ОТРИСОВКОЙ
 function initGameEngine() {
     const canvas = document.getElementById("gameCanvas");
     const taskText = document.getElementById("gameTaskText");
@@ -155,12 +154,12 @@ function initGameEngine() {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    playerY = canvas.height * 0.7; 
+    playerY = canvas.height * 0.73; 
     
     gameActive = true;
 
     const handleInteraction = (clientX) => {
-        let doorZoneStart = canvas.width * 0.75;
+        let doorZoneStart = canvas.width * 0.7;
         if (clientX >= doorZoneStart || playerX > 150) {
             targetX = canvas.width * 0.85;
         }
@@ -180,70 +179,130 @@ function gameLoop() {
     let w = canvas.width;
     let h = canvas.height;
 
-    // 1. РИСУЕМ ПИКСЕЛЬНУЮ УЮТНУЮ КОМНАТУ
-    ctx.fillStyle = "#1a0d00"; 
-    ctx.fillRect(0, h * 0.65, w, h * 0.35);
-    ctx.fillStyle = "#2b1a08"; 
-    ctx.fillRect(0, 0, w, h * 0.65);
+    ctx.clearRect(0, 0, w, h);
 
-    // Рисуем уютный камин по центру слева
+    // 1. ОТРИСОВКА ЗАДНЕГО ФОНА СТЕНЫ И ПОЛА
+    let floorY = h * 0.73;
+    ctx.fillStyle = "#1e120c"; // Пол (красивый темный деревянный паркет)
+    ctx.fillRect(0, floorY, w, h - floorY);
+    ctx.fillStyle = "#140f07"; // Глубокий темный фон стен для атмосферы
+    ctx.fillRect(0, 0, w, floorY);
+
+    // Рисуем линии деревянных досок на полу для текстуры
+    ctx.strokeStyle = "#120a06";
+    ctx.lineWidth = 2;
+    for (let i = floorY; i < h; i += 30) {
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
+    }
+
+    // 2. ОТРИСОВКА КРАСИВОГО УЮТНОГО КАМИНА (С КИРПИЧНОЙ КЛАДКОЙ)
     let kamX = w * 0.35;
-    let kamY = h * 0.45;
-    ctx.fillStyle = "#4a4a4a"; 
-    ctx.fillRect(kamX, kamY, 140, 140);
-    ctx.fillStyle = "#111111"; 
-    ctx.fillRect(kamX + 25, kamY + 40, 90, 100);
+    let kamY = floorY - 160;
     
-    ctx.fillStyle = Math.random() > 0.5 ? "#ff6600" : "#ffcc00";
-    ctx.fillRect(kamX + 45 + Math.random() * 20, kamY + 70 + Math.random() * 20, 25, 40);
+    // Кирпичный каркас
+    ctx.fillStyle = "#5c2c16"; 
+    ctx.fillRect(kamX, kamY, 160, 160);
+    // Полка камина
+    ctx.fillStyle = "#3a190b"; 
+    ctx.fillRect(kamX - 10, kamY, 180, 15);
+    // Внутренняя топка камина
+    ctx.fillStyle = "#0a0805"; 
+    ctx.fillRect(kamX + 25, kamY + 40, 110, 120);
 
-    // 2. РИСУЕМ СВЕТЯЩУЮСЯ НЕОНОВУЮ ДВЕРЬ СПРАВА
-    let doorX = w * 0.82;
-    let doorY = h * 0.3;
-    let doorW = 75;
-    let doorH = h * 0.4;
+    // Кирпичные штрихи для детализации
+    ctx.fillStyle = "#4a230f";
+    ctx.fillRect(kamX + 15, kamY + 30, 30, 12);
+    ctx.fillRect(kamX + 115, kamY + 70, 35, 12);
+    ctx.fillRect(kamX + 10, kamY + 110, 25, 12);
 
-    ctx.shadowBlur = 20;
+    // ЭФФЕКТ МЯГКОГО СВЕТА ОТ ОГНЯ (Радиальный градиент)
+    let fireGlow = ctx.createRadialGradient(kamX + 80, kamY + 110, 10, kamX + 80, kamY + 110, 140);
+    fireGlow.addColorStop(0, "rgba(255, 102, 0, 0.4)");
+    fireGlow.addColorStop(0.4, "rgba(255, 51, 0, 0.15)");
+    fireGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = fireGlow;
+    ctx.beginPath(); ctx.arc(kamX + 80, kamY + 110, 140, 0, Math.PI * 2); ctx.fill();
+
+    // Языки пламени (живая пульсация)
+    ctx.fillStyle = Math.random() > 0.4 ? "#ff5500" : "#ffaa00";
+    ctx.beginPath();
+    ctx.moveTo(kamX + 50, kamY + 160);
+    ctx.lineTo(kamX + 80, kamY + 75 + Math.random() * 20);
+    ctx.lineTo(kamX + 110, kamY + 160);
+    ctx.fill();
+
+    // 3. УЮТНЫЕ ДЕТАЛИ: Ковер перед камином и Картина на стене
+    // Большой мягкий ковер
+    ctx.fillStyle = "#401018";
+    ctx.beginPath(); ctx.ellipse(kamX + 80, floorY + 25, 140, 30, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#5a1824"; ctx.lineWidth = 3; ctx.stroke();
+
+    // Картина-воспоминание над камином
+    ctx.fillStyle = "#22160d"; ctx.fillRect(kamX + 20, kamY - 110, 120, 80); // Рамка
+    ctx.fillStyle = "#0c1a24"; ctx.fillRect(kamX + 26, kamY - 104, 108, 68); // Холст картины
+    // Рисуем на картине силуэт гор и луны ночного неба
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; ctx.beginPath(); ctx.arc(kamX + 100, kamY - 85, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#050a12"; ctx.beginPath(); ctx.moveTo(kamX + 30, kamY - 36); ctx.lineTo(kamX + 70, kamY - 75); ctx.lineTo(kamX + 110, kamY - 36); ctx.fill();
+
+    // 4. ОТРИСОВКА НЕОНОВОЙ ДВЕРИ ВОСПОМИНАНИЙ СПРАВА
+    let doorX = w * 0.84;
+    let doorY = floorY - 260;
+    let doorW = 85;
+    let doorH = 260;
+
+    ctx.shadowBlur = 25;
     ctx.shadowColor = "#ff00ff"; 
-    ctx.fillStyle = "rgba(255, 0, 255, 0.2)";
+    ctx.fillStyle = "rgba(255, 0, 255, 0.15)";
     ctx.fillRect(doorX, doorY, doorW, doorH);
     ctx.strokeStyle = "#ff00ff";
     ctx.lineWidth = 4;
     ctx.strokeRect(doorX, doorY, doorW, doorH);
     ctx.shadowBlur = 0; 
 
-    // 3. ФИЗИКА ДВИЖЕНИЯ И АНИМАЦИЯ ПЕРСОНАЖА
+    // Изящная неоновая ручка двери
+    ctx.fillStyle = "#00e5ff"; ctx.fillRect(doorX + 12, doorY + doorH / 2 - 10, 6, 20);
+
+    // 5. ФИЗИКА ДВИЖЕНИЯ И АНИМАЦИЯ ПЕРСОНАЖА (ЭЛЬНАРА)
     if (playerX < targetX) { 
         playerX += playerSpeed; 
         playerWalkingAnim += 0.15; 
     }
 
     let bobbingY = Math.sin(playerWalkingAnim) * 4; 
-
     let charX = playerX;
     let charY = playerY + bobbingY;
 
-    ctx.fillStyle = "#ffffff"; 
-    ctx.beginPath();
-    ctx.arc(charX, charY - 140, 18, 0, Math.PI * 2);
+    // Свечение вокруг персонажа для контраста
+    let playerGlow = ctx.createRadialGradient(charX, charY - 90, 5, charX, charY - 90, 60);
+    playerGlow.addColorStop(0, "rgba(0, 229, 255, 0.15)");
+    playerGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = playerGlow;
+    ctx.beginPath(); 
+    ctx.arc(charX, charY - 90, 60, 0, Math.PI * 2); 
     ctx.fill();
 
-    ctx.fillStyle = "#00e5ff"; 
-    ctx.fillRect(charX - 16, charY - 115, 32, 65);
+    // Аккуратная геометрия пиксельного человечка
+    ctx.fillStyle = "#ffffff"; // Голова
+    ctx.beginPath(); 
+    ctx.arc(charX, charY - 140, 16, 0, Math.PI * 2); 
+    ctx.fill();
 
-    ctx.fillStyle = "#ffffff"; 
-    ctx.fillRect(charX - 14, charY - 50, 10, 50);
-    ctx.fillRect(charX + 4, charY - 50, 10, 50);
+    ctx.fillStyle = "#00e5ff"; // Яркая куртка
+    ctx.fillRect(charX - 15, charY - 118, 30, 65);
 
-    // 4. ТРИГГЕР КАСАНИЯ ДВЕРИ
-    if (playerX >= doorX - 10) {
+    ctx.fillStyle = "#ffffff"; // Ноги
+    ctx.fillRect(charX - 13, charY - 53, 9, 53);
+    ctx.fillRect(charX + 4, charY - 53, 9, 53);
+
+    // 6. ТРИГГЕР КАСАНИЯ ДВЕРИ
+    if (playerX >= doorX - 15) {
         gameActive = false;
         canvas.style.display = "none";
         document.getElementById("gameTaskText").style.display = "none";
-
+        
         const doorSound = document.getElementById("doorSound");
         if (doorSound) doorSound.play().catch(e => console.log(e));
-
+        
         triggerLightningEffect();
         startScreenshowAlbum();
         return;
@@ -280,7 +339,7 @@ function startFinalSequence() {
     document.getElementById("bgImage").style.display = "none";
     document.getElementById("bgOverlay").style.display = "none";
     document.getElementById("particles-container").style.display = "none";
-    stopLightning = true; 
+    stopLightning = true;
 
     if (contentBlock) {
         contentBlock.style.justifyContent = "center";
