@@ -90,13 +90,18 @@ function changeText(title, text) {
     }, 600);
 }
 
+// ИСПРАВЛЕНО: Убрана критическая опечатка, ломавшая запуск
 function showSingleScreenshot(imgName, duration) {
     const imgElement = document.getElementById("screenshotDisplay");
     if (!imgElement) return;
     imgElement.classList.remove("zoom-active");
     imgElement.src = imgName;
-    setTimeout(() => { imgElement.add ? imgElement.add() : imgElement.classList.add("zoom-active"); }, 100);
-    setTimeout(() => { imgElement.classList.remove("zoom-active"); }, duration - 1200);
+    setTimeout(() => { 
+        imgElement.classList.add("zoom-active"); 
+    }, 100);
+    setTimeout(() => { 
+        imgElement.classList.remove("zoom-active"); 
+    }, duration - 1200);
 }
 
 function playVoice() {
@@ -156,14 +161,13 @@ function initGameEngine() {
 
     const handleInteraction = (clientX) => {
         let doorZoneStart = canvas.width * 0.75;
-        // Персонаж идет только если кликнули в сторону двери (в правую часть)
         if (clientX >= doorZoneStart || playerX > 150) {
             targetX = canvas.width * 0.85;
         }
     };
 
     canvas.addEventListener("click", (e) => handleInteraction(e.clientX));
-    canvas.addEventListener("touchstart", (e) => handleInteraction(e.touches[0].clientX));
+    canvas.addEventListener("touchstart", (e) => handleInteraction(e.touches.clientX));
 
     requestAnimationFrame(gameLoop);
 }
@@ -177,20 +181,19 @@ function gameLoop() {
     let h = canvas.height;
 
     // 1. РИСУЕМ ПИКСЕЛЬНУЮ УЮТНУЮ КОМНАТУ
-    ctx.fillStyle = "#1a0d00"; // Пол в комнате (темное дерево)
+    ctx.fillStyle = "#1a0d00"; 
     ctx.fillRect(0, h * 0.65, w, h * 0.35);
-    ctx.fillStyle = "#2b1a08"; // Стены комнаты
+    ctx.fillStyle = "#2b1a08"; 
     ctx.fillRect(0, 0, w, h * 0.65);
 
     // Рисуем уютный камин по центру слева
     let kamX = w * 0.35;
     let kamY = h * 0.45;
-    ctx.fillStyle = "#4a4a4a"; // Основание камня
+    ctx.fillStyle = "#4a4a4a"; 
     ctx.fillRect(kamX, kamY, 140, 140);
-    ctx.fillStyle = "#111111"; // Очаг
+    ctx.fillStyle = "#111111"; 
     ctx.fillRect(kamX + 25, kamY + 40, 90, 100);
     
-    // Анимация пламени камина (мерцающие искорки)
     ctx.fillStyle = Math.random() > 0.5 ? "#ff6600" : "#ffcc00";
     ctx.fillRect(kamX + 45 + Math.random() * 20, kamY + 70 + Math.random() * 20, 25, 40);
 
@@ -201,39 +204,38 @@ function gameLoop() {
     let doorH = h * 0.4;
 
     ctx.shadowBlur = 20;
-    ctx.shadowColor = "#ff00ff"; // Розовое неоновое свечение двери воспоминаний
+    ctx.shadowColor = "#ff00ff"; 
     ctx.fillStyle = "rgba(255, 0, 255, 0.2)";
     ctx.fillRect(doorX, doorY, doorW, doorH);
     ctx.strokeStyle = "#ff00ff";
     ctx.lineWidth = 4;
     ctx.strokeRect(doorX, doorY, doorW, doorH);
-    ctx.shadowBlur = 0; // Сбрасываем свечение, чтобы персонаж не светился
+    ctx.shadowBlur = 0; 
 
-    // 3. ФИЗИКА ДВИЖЕНИЯ И АНИМАЦИЯ ПЕРСОНАЖА (ЭЛЬНАРА)
+    // 3. ФИЗИКА ДВИЖЕНИЯ И АНИМАЦИЯ ПЕРСОНАЖА
     if (playerX < targetX) { 
         playerX += playerSpeed; 
-        playerWalkingAnim += 0.15; // Скорость покачивания при ходьбе
+        playerWalkingAnim += 0.15; 
     }
 
-    let bobbingY = Math.sin(playerWalkingAnim) * 4; // Эффект шагов (качание вверх-вниз)
+    let bobbingY = Math.sin(playerWalkingAnim) * 4; 
 
-    // Рисуем стильный силуэт персонажа геометрией
     let charX = playerX;
     let charY = playerY + bobbingY;
 
-    ctx.fillStyle = "#ffffff"; // Голова (белый круг)
+    ctx.fillStyle = "#ffffff"; 
     ctx.beginPath();
     ctx.arc(charX, charY - 140, 18, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#00e5ff"; // Куртка / Тело (неоновый прямоугольник)
+    ctx.fillStyle = "#00e5ff"; 
     ctx.fillRect(charX - 16, charY - 115, 32, 65);
 
-    ctx.fillStyle = "#ffffff"; // Ноги (брюки)
+    ctx.fillStyle = "#ffffff"; 
     ctx.fillRect(charX - 14, charY - 50, 10, 50);
     ctx.fillRect(charX + 4, charY - 50, 10, 50);
 
-    // 4. ТРИГГЕР: Проверяем касание двери
+    // 4. ТРИГГЕР КАСАНИЯ ДВЕРИ
     if (playerX >= doorX - 10) {
         gameActive = false;
         canvas.style.display = "none";
@@ -290,11 +292,11 @@ function startFinalSequence() {
 
     setTimeout(() => { if (p) p.innerText = "Ирина..."; }, 3000);
     
-    setTimeout(() => { 
+    setTimeout(() => {
         if (h1) { h1.className = "huge-text"; h1.innerText = "Я ЛЮБЛЮ ТЕБЯ"; }
-        if (p) p.innerText = ""; 
+        if (p) p.innerText = "";
     }, 5000);
-    
+
     setTimeout(() => {
         if (h1) { h1.innerText = ""; h1.className = ""; }
         if (finalVoice) {
@@ -354,10 +356,5 @@ function runFinalScreenFive() {
     }, 20000);
 }
 
-function actionDelete() { 
-    window.location.href = "delete.html"; 
-}
-
-function actionSave() { 
-    window.location.href = "save.html"; 
-}
+function actionDelete() { window.location.href = "delete.html"; }
+function actionSave() { window.location.href = "save.html"; }
