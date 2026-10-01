@@ -315,11 +315,119 @@ function startScreenshowAlbum() {
     const overlay = document.getElementById("bgOverlay");
     if (overlay) overlay.style.background = "rgba(0,0,0,0.88)";
 
+    // Каждая картинка горит 5 секунд (5000 миллисекунд)
     showSingleScreenshot("screen1.png", 5000);
+    
     setTimeout(() => { showSingleScreenshot("screen2.png", 5000); }, 5000);
     setTimeout(() => { showSingleScreenshot("screen3.png", 5000); }, 10000);
-    setTimeout(() => { startFinalSequence(); }, 15000);
+    setTimeout(() => { showSingleScreenshot("screen4.png", 5000); }, 15000);
+    setTimeout(() => { showSingleScreenshot("screen5.png", 5000); }, 20000);
+    setTimeout(() => { showSingleScreenshot("screen6.png", 5000); }, 25000);
+    setTimeout(() => { showSingleScreenshot("screen7.png", 5000); }, 30000);
+    setTimeout(() => { showSingleScreenshot("screen8.png", 5000); }, 35000);
+    setTimeout(() => { showSingleScreenshot("screen9.png", 5000); }, 40000);
+    setTimeout(() => { showSingleScreenshot("screen10.png", 5000); }, 45000);
+
+    // Ровно через 50 секунд закрываем альбом и переходим к признанию
+    setTimeout(() => { startFinalSequence(); }, 50000);
 }
+
+function startFinalSequence() {
+    const music = document.getElementById("kamin");
+    const finalVoice = document.getElementById("finalVoice");
+    const contentBlock = document.querySelector(".content");
+    const h1 = document.getElementById("mainTitle");
+    const p = document.getElementById("mainText");
+    const pSub = document.getElementById("finalSubText");
+
+    if (music) {
+        let fadeKamin = setInterval(function() {
+            if (music.volume > 0.02) { music.volume -= 0.02; } 
+            else { music.pause(); clearInterval(fadeKamin); }
+        }, 100);
+    }
+
+    document.getElementById("bgImage").style.display = "none";
+    document.getElementById("bgOverlay").style.display = "none";
+    document.getElementById("particles-container").style.display = "none";
+    stopLightning = true;
+
+    if (contentBlock) {
+        contentBlock.style.justifyContent = "center";
+        contentBlock.style.paddingTop = "20px";
+    }
+    if (h1) { h1.style.transition = "none"; h1.style.opacity = "1"; h1.innerText = ""; }
+    if (p) { p.style.transition = "none"; p.style.opacity = "1"; p.innerText = "Спасибо за эти моменты."; }
+    if (pSub) pSub.style.transition = "none";
+
+    setTimeout(() => { if (p) p.innerText = "Ирина..."; }, 3000);
+    
+    setTimeout(() => {
+        if (h1) { h1.className = "huge-text"; h1.innerText = "Я ЛЮБЛЮ ТЕБЯ"; }
+        if (p) p.innerText = "";
+    }, 5000);
+
+    setTimeout(() => {
+        if (h1) { h1.innerText = ""; h1.className = ""; }
+        if (finalVoice) {
+            finalVoice.volume = 1;
+            finalVoice.play().catch(() => runFinalScreenFive());
+            finalVoice.onended = function() { runFinalScreenFive(); };
+        } else {
+            runFinalScreenFive();
+        }
+    }, 11000);
+}
+
+function runFinalScreenFive() {
+    const h1 = document.getElementById("mainTitle");
+    const pSub = document.getElementById("finalSubText");
+    const saga = document.getElementById("sagaMusic");
+    const finalBtns = document.getElementById("finalButtons");
+
+    if (saga) {
+        saga.volume = 0.3;
+        saga.play().catch(e => console.log("Ошибка саги:", e));
+    }
+    if (h1) { h1.style.opacity = "1"; h1.innerText = "Ирина ❤️ Эльнар"; }
+    if (pSub) { pSub.innerText = "Спасибо за эти полгода."; pSub.style.opacity = "1"; }
+
+    setTimeout(() => {
+        if (h1) h1.style.transition = "opacity 2.5s ease";
+        if (pSub) pSub.style.transition = "opacity 2.5s ease";
+        if (h1) h1.classList.add("fade-out");
+        if (pSub) pSub.classList.add("fade-out");
+    }, 7000);
+
+    setTimeout(() => {
+        if (pSub) pSub.innerText = "";
+        if (h1) {
+            h1.classList.remove("fade-out");
+            h1.style.transition = "opacity 1.5s ease";
+            h1.innerText = "Конец?";
+        }
+    }, 9500);
+
+    setTimeout(() => { if (h1) h1.classList.add("fade-out"); }, 13000);
+
+    setTimeout(() => {
+        if (h1) {
+            h1.classList.remove("fade-out");
+            h1.style.transition = "opacity 1.5s ease";
+            h1.innerText = "Может быть, только начало.";
+        }
+    }, 15000);
+
+    setTimeout(() => {
+        if (finalBtns) {
+            finalBtns.style.opacity = "1";
+            finalBtns.style.pointerEvents = "auto";
+        }
+    }, 20000);
+}
+
+function actionDelete() { window.location.href = "delete.html"; }
+function actionSave() { window.location.href = "save.html"; }
 
 function startFinalSequence() {
     const music = document.getElementById("kamin");
