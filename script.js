@@ -143,7 +143,7 @@ function startKaminSequence() {
     }, 20000);
 }
 
-// ДВИЖОК И ГРАФИКА МИНИ-ИГРЫ НА CANVAS (САМОРИСОВАНИЕ)
+// ДВИЖОК МИНИ-ИГРЫ НА CANVAS (ПОЛНОСТЬЮ АВТОНОМНЫЙ)
 function initGameEngine() {
     const canvas = document.getElementById("gameCanvas");
     const taskText = document.getElementById("gameTaskText");
@@ -158,7 +158,7 @@ function initGameEngine() {
     
     gameActive = true;
 
-    // ИСПРАВЛЕНО: Теперь клик в ЛЮБУЮ точку экрана заставляет персонажа идти к двери
+    // Клик в любую точку заставляет персонажа идти вправо
     canvas.addEventListener("click", () => {
         targetX = canvas.width * 0.85;
     });
@@ -178,7 +178,8 @@ function gameLoop() {
     let w = canvas.width;
     let h = canvas.height;
 
-    // 1. РИСУЕМ ПИКСЕЛЬНУЮ УЮТНУЮ КОМНАТУ
+    // ИСПРАВЛЕНО: Убрано обращение к несуществующим объектам roomBg и charImg
+    // 1. Отрисовка уютной комнаты
     ctx.fillStyle = "#1a0d00"; 
     ctx.fillRect(0, h * 0.65, w, h * 0.35);
     ctx.fillStyle = "#2b1a08"; 
@@ -195,7 +196,7 @@ function gameLoop() {
     ctx.fillStyle = Math.random() > 0.5 ? "#ff6600" : "#ffcc00";
     ctx.fillRect(kamX + 45 + Math.random() * 20, kamY + 70 + Math.random() * 20, 25, 40);
 
-    // 2. РИСУЕМ СВЕТЯЩУЮСЯ НЕОНОВУЮ ДВЕРЬ СПРАВА
+    // 2. Рисуем светящуюся неоновую дверь справа
     let doorX = w * 0.82;
     let doorY = h * 0.3;
     let doorW = 75;
@@ -210,7 +211,7 @@ function gameLoop() {
     ctx.strokeRect(doorX, doorY, doorW, doorH);
     ctx.shadowBlur = 0; 
 
-    // 3. ФИЗИКА ДВИЖЕНИЯ И АНИМАЦИЯ ПЕРСОНАЖА
+    // 3. Движение и анимация персонажа
     if (playerX < targetX) { 
         playerX += playerSpeed; 
         playerWalkingAnim += 0.15; 
@@ -233,7 +234,7 @@ function gameLoop() {
     ctx.fillRect(charX - 14, charY - 50, 10, 50);
     ctx.fillRect(charX + 4, charY - 50, 10, 50);
 
-    // 4. ТРИГГЕР КАСАНИЯ ДВЕРИ
+    // 4. Триггер касания двери
     if (playerX >= doorX - 10) {
         gameActive = false;
         canvas.style.display = "none";
@@ -254,7 +255,6 @@ function startScreenshowAlbum() {
     const overlay = document.getElementById("bgOverlay");
     if (overlay) overlay.style.background = "rgba(0,0,0,0.88)";
 
-    // ПОСЛЕДОВАТЕЛЬНЫЙ ПОКАЗ ВСЕХ 10 СКРИНШОТОВ ЧАТА
     showSingleScreenshot("screen1.png", 5000);
     
     setTimeout(() => { showSingleScreenshot("screen2.png", 5000); }, 5000);
@@ -267,10 +267,8 @@ function startScreenshowAlbum() {
     setTimeout(() => { showSingleScreenshot("screen9.png", 5000); }, 40000);
     setTimeout(() => { showSingleScreenshot("screen10.png", 5000); }, 45000);
 
-    // Через 50 секунд закрываем альбом и переходим к признанию
     setTimeout(() => { startFinalSequence(); }, 50000);
 }
-
 function startFinalSequence() {
     const music = document.getElementById("kamin");
     const finalVoice = document.getElementById("finalVoice");
