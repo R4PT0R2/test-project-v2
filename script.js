@@ -1,13 +1,5 @@
 let stopLightning = false;
 
-// НАСТРОЙКИ ДВИЖКА МИНИ-ИГРЫ С АВТО-ОТРИСОВКОЙ
-let gameActive = false;
-let playerX = 100;
-let playerY = 0;
-let targetX = 100;
-let playerSpeed = 3.5;
-let playerWalkingAnim = 0;
-
 function triggerLightningEffect() {
     const canvas = document.getElementById("lightningCanvas");
     if (!canvas || stopLightning) return;
@@ -40,7 +32,7 @@ function triggerLightningEffect() {
         }
         if (flashes <= 0) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            setTimeout(triggerLightningEffect, Math.random() * 1500 + 500);
+            setTimeout(triggerLightningEffect, Math.random() * 1000 + 400); // Гроза сверкает очень часто
             return;
         }
         flashes--;
@@ -134,127 +126,39 @@ function startKaminSequence() {
     setTimeout(function() { changeText("Но", "Иногда нескольких месяцев достаточно, чтобы человек стал особенным."); }, 10000);
     setTimeout(function() { changeText("Спасибо", "За разговоры. За улыбки. За моменты, которые были только нашими."); }, 15000);
 
+    // Ровно на 20-й секунде убираем приветственный текст и ПЛАВНО включаем интерактивный экран
     setTimeout(function() {
         const h1 = document.getElementById("mainTitle");
         const p = document.getElementById("mainText");
         if (h1) h1.style.opacity = "0";
         if (p) p.style.opacity = "0";
-        initGameEngine();
+
+        const game = document.getElementById("gameScreen");
+        if (game) {
+            game.style.display = "flex";
+            setTimeout(() => { game.style.opacity = "1"; }, 100);
+        }
     }, 20000);
 }
 
-// ДВИЖОК МИНИ-ИГРЫ НА CANVAS (ПОЛНОСТЬЮ АВТОНОМНЫЙ)
-function initGameEngine() {
-    const canvas = document.getElementById("gameCanvas");
-    const taskText = document.getElementById("gameTaskText");
-    if (!canvas) return;
-
-    canvas.style.display = "block";
-    if (taskText) taskText.style.display = "block";
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    playerY = canvas.height * 0.7; 
-    
-    gameActive = true;
-
-    // Клик в любую точку заставляет персонажа идти вправо
-    canvas.addEventListener("click", () => {
-        targetX = canvas.width * 0.85;
-    });
-
-    canvas.addEventListener("touchstart", () => {
-        targetX = canvas.width * 0.85;
-    });
-
-    requestAnimationFrame(gameLoop);
-}
-
-function gameLoop() {
-    if (!gameActive) return;
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-
-    let w = canvas.width;
-    let h = canvas.height;
-
-    // ИСПРАВЛЕНО: Убрано обращение к несуществующим объектам roomBg и charImg
-    // 1. Отрисовка уютной комнаты
-    ctx.fillStyle = "#1a0d00"; 
-    ctx.fillRect(0, h * 0.65, w, h * 0.35);
-    ctx.fillStyle = "#2b1a08"; 
-    ctx.fillRect(0, 0, w, h * 0.65);
-
-    // Рисуем уютный камин по центру слева
-    let kamX = w * 0.35;
-    let kamY = h * 0.45;
-    ctx.fillStyle = "#4a4a4a"; 
-    ctx.fillRect(kamX, kamY, 140, 140);
-    ctx.fillStyle = "#111111"; 
-    ctx.fillRect(kamX + 25, kamY + 40, 90, 100);
-    
-    ctx.fillStyle = Math.random() > 0.5 ? "#ff6600" : "#ffcc00";
-    ctx.fillRect(kamX + 45 + Math.random() * 20, kamY + 70 + Math.random() * 20, 25, 40);
-
-    // 2. Рисуем светящуюся неоновую дверь справа
-    let doorX = w * 0.82;
-    let doorY = h * 0.3;
-    let doorW = 75;
-    let doorH = h * 0.4;
-
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = "#ff00ff"; 
-    ctx.fillStyle = "rgba(255, 0, 255, 0.2)";
-    ctx.fillRect(doorX, doorY, doorW, doorH);
-    ctx.strokeStyle = "#ff00ff";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(doorX, doorY, doorW, doorH);
-    ctx.shadowBlur = 0; 
-
-    // 3. Движение и анимация персонажа
-    if (playerX < targetX) { 
-        playerX += playerSpeed; 
-        playerWalkingAnim += 0.15; 
+// КЛИК ПО НЕОНОВОМУ СЕРДЦУ (Запуск 10 скриншотов)
+function unlockMemories() {
+    const game = document.getElementById("gameScreen");
+    if (game) {
+        game.style.opacity = "0";
+        setTimeout(() => { game.style.display = "none"; }, 1000);
     }
 
-    let bobbingY = Math.sin(playerWalkingAnim) * 4; 
+    const doorSound = document.getElementById("doorSound");
+    if (doorSound) doorSound.play().catch(e => console.log(e));
 
-    let charX = playerX;
-    let charY = playerY + bobbingY;
+    // Мощная финальная вспышка молнии при открытии замка
+    triggerLightningEffect();
 
-    ctx.fillStyle = "#ffffff"; 
-    ctx.beginPath();
-    ctx.arc(charX, charY - 140, 18, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = "#00e5ff"; 
-    ctx.fillRect(charX - 16, charY - 115, 32, 65);
-
-    ctx.fillStyle = "#ffffff"; 
-    ctx.fillRect(charX - 14, charY - 50, 10, 50);
-    ctx.fillRect(charX + 4, charY - 50, 10, 50);
-
-    // 4. Триггер касания двери
-    if (playerX >= doorX - 10) {
-        gameActive = false;
-        canvas.style.display = "none";
-        document.getElementById("gameTaskText").style.display = "none";
-
-        const doorSound = document.getElementById("doorSound");
-        if (doorSound) doorSound.play().catch(e => console.log(e));
-
-        triggerLightningEffect();
-        startScreenshowAlbum();
-        return;
-    }
-
-    requestAnimationFrame(gameLoop);
-}
-
-function startScreenshowAlbum() {
     const overlay = document.getElementById("bgOverlay");
     if (overlay) overlay.style.background = "rgba(0,0,0,0.88)";
 
+    // Бесшовный показ альбома из 10 скриншотов
     showSingleScreenshot("screen1.png", 5000);
     
     setTimeout(() => { showSingleScreenshot("screen2.png", 5000); }, 5000);
@@ -269,6 +173,7 @@ function startScreenshowAlbum() {
 
     setTimeout(() => { startFinalSequence(); }, 50000);
 }
+
 function startFinalSequence() {
     const music = document.getElementById("kamin");
     const finalVoice = document.getElementById("finalVoice");
