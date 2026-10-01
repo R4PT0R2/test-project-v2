@@ -1,4 +1,5 @@
 let stopLightning = false;
+let isUnlocked = false; // Защита от двойного клика
 
 function triggerLightningEffect() {
     const canvas = document.getElementById("lightningCanvas");
@@ -32,7 +33,7 @@ function triggerLightningEffect() {
         }
         if (flashes <= 0) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            setTimeout(triggerLightningEffect, Math.random() * 1000 + 400); // Гроза сверкает очень часто
+            setTimeout(triggerLightningEffect, Math.random() * 1000 + 400); 
             return;
         }
         flashes--;
@@ -126,7 +127,6 @@ function startKaminSequence() {
     setTimeout(function() { changeText("Но", "Иногда нескольких месяцев достаточно, чтобы человек стал особенным."); }, 10000);
     setTimeout(function() { changeText("Спасибо", "За разговоры. За улыбки. За моменты, которые были только нашими."); }, 15000);
 
-    // Ровно на 20-й секунде убираем приветственный текст и ПЛАВНО включаем интерактивный экран
     setTimeout(function() {
         const h1 = document.getElementById("mainTitle");
         const p = document.getElementById("mainText");
@@ -141,8 +141,11 @@ function startKaminSequence() {
     }, 20000);
 }
 
-// КЛИК ПО НЕОНОВОМУ СЕРДЦУ (Запуск 10 скриншотов)
+// ИСПРАВЛЕНО: Полная и безошибочная активация функции разблокировки воспоминаний
 function unlockMemories() {
+    if (isUnlocked) return; 
+    isUnlocked = true; 
+
     const game = document.getElementById("gameScreen");
     if (game) {
         game.style.opacity = "0";
@@ -152,13 +155,11 @@ function unlockMemories() {
     const doorSound = document.getElementById("doorSound");
     if (doorSound) doorSound.play().catch(e => console.log(e));
 
-    // Мощная финальная вспышка молнии при открытии замка
     triggerLightningEffect();
 
     const overlay = document.getElementById("bgOverlay");
     if (overlay) overlay.style.background = "rgba(0,0,0,0.88)";
 
-    // Бесшовный показ альбома из 10 скриншотов
     showSingleScreenshot("screen1.png", 5000);
     
     setTimeout(() => { showSingleScreenshot("screen2.png", 5000); }, 5000);
@@ -173,7 +174,6 @@ function unlockMemories() {
 
     setTimeout(() => { startFinalSequence(); }, 50000);
 }
-
 function startFinalSequence() {
     const music = document.getElementById("kamin");
     const finalVoice = document.getElementById("finalVoice");
